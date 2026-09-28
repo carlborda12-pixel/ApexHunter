@@ -2,19 +2,19 @@
    - Guarda la app para usarla sin internet.
    - Revisa los recordatorios y muestra las notificaciones. */
 
-const VERSION = 'apex-hunter-v2';
+const VERSION = 'apex-hunter-v3';
 const FONTS = 'apex-hunter-fonts';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/favicon-32.png',
-  './icons/badge-96.png'
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
+  './apple-touch-icon.png',
+  './favicon-32.png',
+  './badge-96.png'
 ];
 
 self.addEventListener('install', e => {
@@ -87,8 +87,8 @@ async function idbPut(k, v) {
 function notify(title, body, tag, url) {
   return self.registration.showNotification(title, {
     body, tag, data: {url},
-    icon: './icons/icon-192.png',
-    badge: './icons/badge-96.png'
+    icon: './icon-192.png',
+    badge: './badge-96.png'
   });
 }
 
