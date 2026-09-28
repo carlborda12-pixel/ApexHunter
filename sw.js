@@ -1,12 +1,16 @@
 /* Apex Hunter — service worker
    - Guarda la app para usarla sin internet.
-   - Revisa los recordatorios y muestra las notificaciones. */
+   - Avisos locales (cuando no está activado el push).
+   - Recibe las notificaciones push del servidor. */
 
-const VERSION = 'apex-hunter-v3';
+importScripts('./reminders.js');
+
+const VERSION = 'apex-hunter-v5';
 const FONTS = 'apex-hunter-fonts';
 const SHELL = [
   './',
   './index.html',
+  './reminders.js',
   './manifest.webmanifest',
   './icon.svg',
   './icon-192.png',
@@ -34,7 +38,6 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Tipografías de Google: se guardan para usarlas sin conexión
   if (url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com') {
     e.respondWith(caches.open(FONTS).then(async c => {
       const hit = await c.match(req);
@@ -44,8 +47,8 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/')) return; // siempre a la red
 
-  // La página: primero internet (para recibir actualizaciones), si no hay, la copia guardada
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)
@@ -57,13 +60,8 @@ self.addEventListener('fetch', e => {
   e.respondWith(caches.match(req).then(hit => hit || fetch(req)));
 });
 
-/* ---------- Recordatorios ---------- */
+/* ---------- Avisos locales ---------- */
 const pad = n => String(n).padStart(2, '0');
-const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-const parseISO = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
-const weekStart = s => { const d = parseISO(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return iso(d); };
-const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const money = new Intl.NumberFormat('es-AR', {style: 'currency', currency: 'ARS', maximumFractionDigits: 0});
 
 function idbOpen() {
   return new Promise((res, rej) => {
@@ -84,11 +82,10 @@ async function idbPut(k, v) {
   db.close();
 }
 
-function notify(title, body, tag, url) {
-  return self.registration.showNotification(title, {
-    body, tag, data: {url},
-    icon: './icon-192.png',
-    badge: './badge-96.png'
+function show(n) {
+  return self.registration.showNotification(n.title, {
+    body: n.body, tag: n.tag, data: { url: n.url || './' },
+    icon: './icon-192.png', badge: './badge-96.png'
   });
 }
 
@@ -97,69 +94,36 @@ function check() {
   if (!checking) checking = runCheck().catch(() => {}).finally(() => { checking = null; });
   return checking;
 }
-
 async function runCheck() {
   const st = await idbGet('estado');
-  if (!st || !st.rec) return;
+  if (!st || !st.data || st.pushActivo) return; // con push activo, avisa el servidor
+  const d = new Date();
+  const now = { fecha: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), hm: pad(d.getHours()) + ':' + pad(d.getMinutes()) };
   const log = (await idbGet('avisados')) || {};
-  const now = new Date();
-  const hoy = iso(now);
-  const hm = pad(now.getHours()) + ':' + pad(now.getMinutes());
-  let changed = false;
-
-  // Entrenamiento
-  const ent = st.rec.entreno;
-  if (ent && ent.on && hm >= ent.hora && log.entreno !== hoy) {
-    const fechas = st.fechasEntreno || [];
-    const ws = weekStart(hoy);
-    const dias = new Set(fechas.filter(f => f >= ws)).size;
-    const meta = st.meta || 4;
-    const falta = meta - dias;
-    const quedan = 7 - ((now.getDay() + 6) % 7); // días que quedan en la semana, contando hoy
-    if (!fechas.includes(hoy) && falta > 0) {
-      let body;
-      if (falta > quedan) body = 'Esta semana ya no llegás a la meta, pero cada sesión cuenta. Hoy sumá una.';
-      else if (falta === quedan) body = 'Te faltan ' + falta + (falta === 1 ? ' día' : ' días') + ' y queda' + (quedan === 1 ? '' : 'n') + ' ' + quedan + '. Hoy no se puede fallar.';
-      else body = 'Llevás ' + dias + ' de ' + meta + ' días esta semana. ¿Entrenás hoy?';
-      await notify('Hora de entrenar', body, 'entreno', './#entreno');
-    }
-    log.entreno = hoy; changed = true;
-  }
-
-  // Finanzas
-  const fin = st.rec.finanzas;
-  if (fin && fin.on && hm >= fin.hora && log.finanzas !== hoy) {
-    const prev = iso(new Date(now.getFullYear(), now.getMonth() - 1, 1)).slice(0, 7);
-    const t = st.totales && st.totales[prev];
-    if (now.getDate() === 1 && t && log.resumen !== prev) {
-      const bal = t.ing - t.gas;
-      const mes = MESES[+prev.slice(5) - 1];
-      await notify('Cerró ' + mes,
-        'Ingresos ' + money.format(t.ing) + ' · Gastos ' + money.format(t.gas) + ' · Balance ' + (bal < 0 ? '−' : '') + money.format(Math.abs(bal)),
-        'resumen', './#finanzas');
-      log.resumen = prev;
-    } else if (!(st.fechasMov || []).includes(hoy)) {
-      await notify('Anotá tus movimientos', '¿Cobraste o gastaste algo hoy? Cargalo ahora y mantené tus números al día.', 'finanzas', './#finanzas');
-    }
-    log.finanzas = hoy; changed = true;
-  }
-
-  if (changed) await idbPut('avisados', log);
+  const out = self.ApexReminders.compute(st.data, now, log);
+  for (const n of out.notifs) await show(n);
+  if (out.changed) await idbPut('avisados', out.log);
 }
 
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'check') e.waitUntil(check());
 });
-
 self.addEventListener('periodicsync', e => {
   if (e.tag === 'apex-recordatorios') e.waitUntil(check());
+});
+
+/* ---------- Push del servidor ---------- */
+self.addEventListener('push', e => {
+  let n = { title: 'Apex Hunter', body: 'Tenés un aviso nuevo.', tag: 'apex', url: './' };
+  try { if (e.data) n = Object.assign(n, e.data.json()); } catch (_) {}
+  e.waitUntil(show(n));
 });
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
   e.waitUntil(
-    self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(list => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const c of list) {
         if ('focus' in c) return c.focus().then(w => (w && w.navigate ? w.navigate(url) : w)).catch(() => {});
       }
