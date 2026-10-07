@@ -5,7 +5,7 @@
 
 importScripts('./reminders.js');
 
-const VERSION = 'apex-hunter-v6';
+const VERSION = 'apex-hunter-v8';
 const FONTS = 'apex-hunter-fonts';
 const SHELL = [
   './',

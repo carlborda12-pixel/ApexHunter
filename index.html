@@ -138,6 +138,25 @@ button.row:hover .t{color:var(--accent)}
 .day .cta{margin-top:6px}
 .mins .chip{min-width:52px;text-align:center}
 
+.alert .d.ok{background:var(--accent)}
+.alert.ins{align-items:flex-start}
+.alert.ins .d{margin-top:7px}
+.alert.ins .ic{margin-top:3px}
+.alert span b{display:block;font-weight:600;font-size:14.5px}
+.alert span small{display:block;font-size:13px;line-height:1.45;color:var(--ink-2);margin-top:3px}
+.bar.btn{border:0;background:none;padding:0;text-align:left;width:100%;color:inherit;font:inherit;font-size:14px}
+.bar.btn:hover span:first-child{color:var(--accent)}
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px 14px;align-items:baseline;padding:4px 0}
+.cmp .k{font-size:14px;color:var(--ink-2)}
+.cmp .v{font-family:var(--mono);font-stretch:85%;font-size:14px;text-align:right}
+.cmp .d{font-family:var(--mono);font-stretch:85%;font-size:12px;text-align:right;color:var(--ink-3);min-width:70px}
+.cmp .d.good{color:var(--in)} .cmp .d.bad{color:var(--out)}
+.pline{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.pdot{fill:var(--accent)}
+.b-warn{fill:var(--warn)}
+.hero-num .unit{font-family:var(--body);font-size:15px;font-weight:400;letter-spacing:0;color:var(--ink-3);margin-left:10px}
+.amount span.after{font-size:20px}
+
 /* ---------- Bottom nav ---------- */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 20px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,rgba(7,12,21,0))}
 .nav-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 64px 1fr;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:6px}
@@ -437,6 +456,10 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
   <main id="finView" class="wrap" style="gap:28px">
     <section class="hero" id="finHero"></section>
     <div class="alerts" id="finAlerts"></div>
+    <section class="sec" id="metasSec" hidden>
+      <div class="sec-h"><span>Metas de ahorro</span><button type="button" data-open="sh-metas" id="metasMore"></button></div>
+      <div class="bars" id="metasMain"></div>
+    </section>
     <section class="sec" id="finCatsSec">
       <div class="sec-h"><span>En qué se fue</span><button type="button" id="catsAll"></button></div>
       <div class="bars" id="finCats"></div>
@@ -449,6 +472,7 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
 
   <main id="entView" class="wrap" style="gap:28px" hidden>
     <section class="hero" id="entHero"></section>
+    <div class="alerts" id="entAlerts" hidden></div>
     <section class="sec day">
       <div class="sec-h"><span id="dayTitle" style="font-size:15px;color:var(--ink)"></span><span id="dayPlan"></span></div>
       <div class="day-ok" id="dayOk" hidden></div>
@@ -506,6 +530,11 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
       <span class="rpe"><input type="range" id="eRpe" min="1" max="10" value="7"><output id="eRpeOut">7</output></span>
     </label>
     <div class="stack" id="eObjWrap" style="gap:8px"><span class="eyebrow" style="font-size:12.5px">Trabajé en</span><div class="chips" id="eObjs"></div></div>
+    <div class="srow" style="padding:4px 0;border-top:0"><div class="t">Hubo sparring</div><div class="r"><button type="button" class="switch" role="switch" id="eSpOn" aria-checked="false" aria-label="Hubo sparring"></button></div></div>
+    <div class="stack" id="eSpWrap" hidden style="gap:10px">
+      <div class="two"><label class="f">Con quién<input type="text" id="eSpCon" maxlength="40" placeholder="Opcional"></label><label class="f">Rounds<input type="number" id="eSpRounds" min="1" max="30" placeholder="—"></label></div>
+      <label class="f">Qué me costó<input type="text" id="eSpCosto" maxlength="120" placeholder="Salir de la esquina, la guardia baja…"></label>
+    </div>
     <label class="f">Nota<input type="text" id="eNota" maxlength="120" placeholder="Opcional"></label>
     <button class="primary" type="submit" id="eSubmit">Guardar</button>
         <button type="button" class="danger" id="eDel" hidden>Borrar sesión</button>
@@ -518,7 +547,9 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
     <button type="button" data-open="sh-fijos"><svg class="ic"><use href="#i-repeat"/></svg><span>Gastos fijos</span><small id="mFijos"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-cobros"><svg class="ic"><use href="#i-receipt"/></svg><span>Por cobrar</span><small id="mCobros"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-budget"><svg class="ic"><use href="#i-target"/></svg><span>Presupuestos</span><small id="mBudget"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <button type="button" data-open="sh-metas"><svg class="ic"><use href="#i-target"/></svg><span>Metas de ahorro</span><small id="mMetas"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-hist6"><svg class="ic"><use href="#i-chart"/></svg><span>Últimos 6 meses</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <button type="button" id="cierreBtnF"><svg class="ic"><use href="#i-calendar"/></svg><span>Cierre de mes</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <div class="srow" style="border-top:1px solid var(--line)"><div class="t" style="display:flex;align-items:center;gap:14px"><svg class="ic" style="color:var(--ink-2)"><use href="#i-dollar"/></svg>Ver en dólares</div><div class="c" id="tcInfo" style="padding-left:34px"></div><div class="r"><button type="button" class="switch" role="switch" id="usdSw" aria-checked="false" aria-label="Ver en dólares"></button></div></div>
     <div class="srow"><div class="t">Meta de ahorro</div><div class="c">Porcentaje de lo que ingresa</div><div class="r"><span class="stepper"><button type="button" data-meta="-5" aria-label="Bajar meta de ahorro">−</button><span id="ahorroVal"></span><button type="button" data-meta="5" aria-label="Subir meta de ahorro">+</button></span></div></div>
   </div>
@@ -589,8 +620,12 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
   <div class="menu">
     <button type="button" data-open="sh-plan"><svg class="ic"><use href="#i-calendar"/></svg><span>Plan y meta semanal</span><small id="mMeta"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-obj"><svg class="ic"><use href="#i-target"/></svg><span>En qué estoy trabajando</span><small id="mObj"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <button type="button" id="pesoBtn"><svg class="ic"><use href="#i-scale"/></svg><span>Peso</span><small id="mPeso"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <button type="button" data-open="sh-carga"><svg class="ic"><use href="#i-bolt"/></svg><span>Carga semanal</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <button type="button" data-open="sh-sparr"><svg class="ic"><use href="#i-glove"/></svg><span>Sparrings</span><small id="mSparr"></small><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-rec"><svg class="ic"><use href="#i-trophy"/></svg><span>Récords</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-hist"><svg class="ic"><use href="#i-chart"/></svg><span>Historial</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <button type="button" id="cierreBtnE"><svg class="ic"><use href="#i-calendar"/></svg><span>Cierre de mes</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
   </div>
   <button type="button" class="danger" id="resetMonth" style="margin-top:10px"></button>
 </section>
@@ -634,8 +669,8 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
 
   <div class="sgroup">Recordatorios</div>
   <div class="note" id="remNote" hidden></div>
-  <div class="srow"><div class="t">Entrenamiento</div><div class="c">Si ese día no entrenaste</div><div class="r"><input type="time" id="rEntHora" aria-label="Hora"><button type="button" class="switch" role="switch" id="rEntOn" aria-checked="false" aria-label="Recordatorio de entrenamiento"></button></div></div>
-  <div class="srow"><div class="t">Finanzas</div><div class="c">Fijos, cobros vencidos o días sin cargar</div><div class="r"><input type="time" id="rFinHora" aria-label="Hora"><button type="button" class="switch" role="switch" id="rFinOn" aria-checked="false" aria-label="Recordatorio de finanzas"></button></div></div>
+  <div class="srow"><div class="t">Entrenamiento</div><div class="c">Solo con motivo: racha en juego, día que solés entrenar, pausa larga o carga alta</div><div class="r"><input type="time" id="rEntHora" aria-label="Hora"><button type="button" class="switch" role="switch" id="rEntOn" aria-checked="false" aria-label="Recordatorio de entrenamiento"></button></div></div>
+  <div class="srow"><div class="t">Finanzas</div><div class="c">Vencimientos, cobros atrasados, presupuestos y ritmo de gasto. Si no hay nada, no te escribo</div><div class="r"><input type="time" id="rFinHora" aria-label="Hora"><button type="button" class="switch" role="switch" id="rFinOn" aria-checked="false" aria-label="Recordatorio de finanzas"></button></div></div>
   <div class="srow" id="pushRow"><div class="t">Con la app cerrada</div><div class="c" id="pushStat"></div><div class="r"><button type="button" class="mini" id="pushTest" hidden>Probar</button><button type="button" class="switch" role="switch" id="pushOn" aria-checked="false" aria-label="Avisos con la app cerrada"></button></div></div>
   <div class="btns" style="margin-top:4px"><button type="button" class="mini" id="rTest">Probar aviso</button></div>
   <p class="fine" id="remFine" style="margin-top:8px"></p>
@@ -661,6 +696,67 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
     <input type="file" id="impFile" accept=".json,application/json" hidden>
   </div>
   <p class="fine" id="saveStat" style="margin-top:10px"></p>
+</section>
+
+<section class="sheet" id="sh-peso" role="dialog" aria-modal="true" aria-label="Peso">
+  <div class="grab"></div>
+  <div class="sh-h"><h2>Peso</h2><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="pesoForm" autocomplete="off">
+    <div class="amount"><input type="number" id="pKg" inputmode="decimal" min="25" max="300" step="0.1" placeholder="0,0" aria-label="Peso en kilos" required><span class="after">kg</span></div>
+    <div class="two"><label class="f">Fecha<input type="date" id="pFecha" required></label><div style="display:flex;align-items:flex-end"><button class="primary" type="submit" style="width:100%">Guardar</button></div></div>
+    <div class="btns" style="justify-content:space-between"><button type="button" class="linkish" id="pSkip">Esta semana no</button><button type="button" class="danger" id="pDel" hidden>Borrar registro</button></div>
+  </form>
+  <div class="stack" style="gap:10px;margin-top:20px">
+    <span class="eyebrow" id="pResumen"></span>
+    <div class="chartbox" id="pesoChart"></div>
+    <div class="list" id="pesoList"></div>
+  </div>
+</section>
+
+<section class="sheet" id="sh-carga" role="dialog" aria-modal="true" aria-label="Carga semanal">
+  <div class="grab"></div>
+  <div class="sh-h"><h2>Carga semanal</h2><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="hero-num" id="cargaNum" style="font-size:40px"></div>
+  <p class="fine" id="cargaTxt" style="margin:10px 0 18px;font-size:14px;color:var(--ink-2)"></p>
+  <div class="chartbox" id="cargaChart"></div>
+  <p class="fine" style="margin-top:14px">Carga = minutos × intensidad de cada sesión, sumado por semana. Se compara con el promedio de tus 4 semanas anteriores. Si pasás 30% arriba aparece un aviso en Entreno.</p>
+</section>
+
+<section class="sheet" id="sh-sparr" role="dialog" aria-modal="true" aria-label="Sparrings">
+  <div class="grab"></div>
+  <div class="sh-h"><h2>Sparrings</h2><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="list" id="sparrList"></div>
+</section>
+
+<section class="sheet" id="sh-metas" role="dialog" aria-modal="true" aria-label="Metas de ahorro">
+  <div class="grab"></div>
+  <div class="sh-h"><h2>Metas de ahorro</h2><div class="l"><button type="button" class="mini go" id="metaNew">Nueva</button><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div></div>
+  <div class="bars" id="metasList" style="gap:18px"></div>
+</section>
+
+<section class="sheet" id="sh-meta" role="dialog" aria-modal="true" aria-labelledby="metaTitle">
+  <div class="grab"></div>
+  <div class="sh-h"><div class="l"><button type="button" class="icbtn back" data-back="sh-metas" aria-label="Volver"><svg class="ic"><use href="#i-left"/></svg></button><h2 id="metaTitle">Nueva meta</h2></div><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div id="metaProg" style="margin-bottom:18px"></div>
+  <div class="inline" id="aporteForm" style="margin-bottom:24px">
+    <input type="number" id="aMonto" min="0" step="any" inputmode="decimal" placeholder="Monto" aria-label="Monto a sumar o retirar">
+    <button type="button" class="mini" id="aSub">Retirar</button>
+    <button type="button" class="mini go" id="aAdd">Sumar</button>
+  </div>
+  <form id="metaForm" autocomplete="off">
+    <div class="two">
+      <label class="f">Nombre<input type="text" id="mNombre" maxlength="40" placeholder="Guantes nuevos" required></label>
+      <label class="f">Objetivo ($)<input type="number" id="mObjetivo" min="1" step="any" placeholder="150000" required></label>
+    </div>
+    <button class="primary" type="submit" id="metaSubmit">Crear meta</button>
+    <button type="button" class="danger" id="metaDel" hidden>Borrar meta</button>
+  </form>
+</section>
+
+<section class="sheet" id="sh-cierre" role="dialog" aria-modal="true" aria-labelledby="cierreTitle">
+  <div class="grab"></div>
+  <div class="sh-h"><h2 id="cierreTitle">Cierre de mes</h2><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div id="cierreBody"></div>
 </section>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -706,7 +802,7 @@ const CAT_OUT = ['Alquiler','Comida','Transporte','Servicios','Herramientas y so
 const TIPOS = [{k:'kick',n:'Kickboxing',s:'Kick'},{k:'box',n:'Boxeo / sparring',s:'Box'},{k:'func',n:'Funcional',s:'Func'},{k:'run',n:'Correr',s:'Run'},{k:'fuerza',n:'Fuerza',s:'Fza'},{k:'otro',n:'Otro',s:'Otro'}];
 const tipoName = k => (TIPOS.find(t => t.k === k) || {n:k}).n;
 const tipoShort = k => (TIPOS.find(t => t.k === k) || {s:k}).s;
-const COLS = ['movs','sesiones','fijos','cobros','objetivos'];
+const COLS = ['movs','sesiones','fijos','cobros','objetivos','pesos','metas'];
 
 /* ================= Modelo de datos ================= */
 const DEFAULT_CFG = () => ({
@@ -715,7 +811,7 @@ const DEFAULT_CFG = () => ({
   presupuestos: {}, plan: {0:[],1:[],2:[],3:[],4:[],5:[],6:[]}, dolar: 'blue',
   timer: {rounds: 5, round: 180, rest: 60, prep: 10}
 });
-const emptyData = () => ({v: 2, movs: [], sesiones: [], fijos: [], cobros: [], objetivos: [], cfg: DEFAULT_CFG()});
+const emptyData = () => ({v: 2, movs: [], sesiones: [], fijos: [], cobros: [], objetivos: [], pesos: [], metas: [], cfg: DEFAULT_CFG()});
 
 function normalize(d){
   if (!d || typeof d !== 'object') return emptyData();
@@ -1070,7 +1166,8 @@ function renderEntMain(){
   $('#entCount').textContent = list.length || '';
   $('#entList').innerHTML = list.length ? lim.map(x => {
     const on = (x.obj || []).map(objName).filter(Boolean);
-    const sub = [shortDate(x.fecha), on.join(', '), x.nota || ''].filter(Boolean).join(' · ');
+    const sp = x.sparring ? 'Sparring'+(x.sparring.con ? ' con '+x.sparring.con : '')+(x.sparring.rounds ? ' ('+x.sparring.rounds+'r)' : '') : '';
+    const sub = [shortDate(x.fecha), sp, on.join(', '), x.nota || ''].filter(Boolean).join(' · ');
     return '<button type="button" class="row" data-ses="'+esc(x.id)+'"><span class="t">'+esc(tipoName(x.tipo))+'</span><span class="s">'+esc(sub)+'</span><span class="v">'+(+x.min)+' min<small>intensidad '+(+x.rpe)+'</small></span></button>';
   }).join('') + (list.length > 12 ? '<button type="button" class="more" id="sesAll">'+(S.sesAll ? 'Ver menos' : 'Ver las '+list.length)+'</button>' : '')
   : '<div class="empty">Todavía no cargaste sesiones en '+MESES[+m.slice(5)-1]+'.</div>';
@@ -1165,8 +1262,249 @@ function render(){
   $$('.nav .tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === S.tab)));
   $('#finView').hidden = S.tab !== 'finanzas';
   $('#entView').hidden = S.tab !== 'entreno';
-  renderFinMain(); renderEntMain(); renderFinSheets(); renderEntSheets(); renderSettings(); renderStatus();
+  renderFinMain(); renderEntMain(); renderFinSheets(); renderEntSheets(); renderExtras(); renderSettings(); renderStatus();
 }
+
+/* ================= Peso, carga, copia, metas, sparring y cierre ================= */
+const EXP_KEY = 'apexHunter.lastExport', FIRST_KEY = 'apexHunter.firstSeen', CIERRE_KEY = 'apexHunter.cierreVisto';
+const CHEV = '<svg class="ic"><use href="#i-chev"/></svg>';
+const kgF = v => (Math.round(v * 10) / 10).toLocaleString('es-AR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+const pesos = () => live(S.data.pesos).sort((a,b) => a.fecha.localeCompare(b.fecha) || ((a.upd||0) - (b.upd||0)));
+const metaAhorrado = m => (m.aportes || []).reduce((a,x) => a + (+x.m || 0), 0);
+
+function weekLoad(ws){ const we = addDays(ws, 6); return sesiones().filter(x => x.fecha >= ws && x.fecha <= we).reduce((a,x) => a + (+x.min||0) * (+x.rpe||0), 0); }
+function loadInfo(){
+  const wk = weekStart(todayISO), cur = weekLoad(wk);
+  const prev = [1,2,3,4].map(k => weekLoad(addDays(wk, -7*k))), conDatos = prev.filter(v => v > 0);
+  const avg = conDatos.length >= 3 ? conDatos.reduce((a,b) => a + b, 0) / conDatos.length : null;
+  return {wk, cur, avg, ratio: avg ? cur / avg : null};
+}
+function backupDue(){
+  if (syncCfg()) return null;
+  if (!(live(S.data.movs).length + live(S.data.sesiones).length)) return null;
+  const base = lsGet(EXP_KEY) || lsGet(FIRST_KEY) || now();
+  const d = Math.floor((now() - base) / 864e5);
+  return d >= 30 ? d : null;
+}
+function cierrePendiente(){
+  if (TODAY.getDate() > 7) return null;
+  const pm = addMonths(mk(TODAY), -1);
+  if (lsGet(CIERRE_KEY) === pm) return null;
+  const hay = live(S.data.movs).some(x => x.fecha.slice(0,7) === pm) || live(S.data.sesiones).some(x => x.fecha.slice(0,7) === pm);
+  return hay ? pm : null;
+}
+
+/* ---------- Cierre de mes ---------- */
+function cierreHTML(m){
+  const pm = addMonths(m, -1), pmN = MESES[+pm.slice(5)-1];
+  const ft = mm => { let ing = 0, gas = 0, n = 0; live(S.data.movs).forEach(x => { if (x.fecha.slice(0,7) !== mm) return; n++; const v = amt(x); if (x.tipo === 'ingreso') ing += v; else gas += v; }); return {n, ing, gas, bal: ing - gas, rate: ing > 0 ? (ing - gas) / ing * 100 : null}; };
+  const et = mm => { const ss = live(S.data.sesiones).filter(x => x.fecha.slice(0,7) === mm); return {n: ss.length, dias: new Set(ss.map(x => x.fecha)).size, min: ss.reduce((a,x) => a + (+x.min||0), 0), rpe: ss.length ? ss.reduce((a,x) => a + (+x.rpe||0), 0) / ss.length : null, sp: ss.filter(x => x.sparring).length}; };
+  const lastPeso = mm => { const p = pesos().filter(x => x.fecha.slice(0,7) === mm); return p.length ? p[p.length-1].kg : null; };
+  const row = (k, v, d) => '<span class="k">'+k+'</span><span class="v">'+v+'</span><span class="d '+(d[1] === null ? '' : d[1] ? 'good' : 'bad')+'">'+d[0]+'</span>';
+  const dPct = (x, y, upGood) => { if (!y) return ['—', null]; const r = Math.round((x - y) / Math.abs(y) * 100); return [(r > 0 ? '↑ ' : r < 0 ? '↓ ' : '= ')+Math.abs(r)+'%', r === 0 ? null : (r > 0) === upGood]; };
+  const dNum = (x, y, f, upGood) => { if (x === null || y === null) return ['—', null]; const df = x - y; const z = Math.abs(df) < 1e-9; return [(z ? '= ' : df > 0 ? '+' : '−')+(z ? '' : f(Math.abs(df))), z || upGood === null ? null : (df > 0) === upGood]; };
+  const a = ft(m), b = ft(pm), c = et(m), d = et(pm), pa = lastPeso(m), pb = lastPeso(pm);
+  let h = '<p class="fine" style="margin-bottom:14px">Comparado con '+pmN+'.</p>';
+  h += '<div class="sgroup">Finanzas</div>';
+  h += a.n ? '<div class="cmp">'+
+    row('Ingresos', fmt(a.ing), dPct(a.ing, b.ing, true))+
+    row('Gastos', fmt(a.gas), dPct(a.gas, b.gas, false))+
+    row('Balance', (a.bal < 0 ? '−' : '')+fmt(Math.abs(a.bal)), b.n ? dNum(a.bal, b.bal, v => fmt(v), true) : ['—', null])+
+    row('Ahorro', a.rate === null ? '—' : Math.round(a.rate)+'%', a.rate !== null && b.rate !== null ? dNum(Math.round(a.rate), Math.round(b.rate), v => v+' pts', true) : ['—', null])+
+    '</div>' : '<div class="empty">Sin movimientos ese mes.</div>';
+  h += '<div class="sgroup">Entrenamiento</div>';
+  h += c.n ? '<div class="cmp">'+
+    row('Días entrenados', c.dias, dNum(c.dias, d.n ? d.dias : null, v => v, true))+
+    row('Tiempo', hm(c.min), d.n ? dNum(c.min, d.min, v => hm(v), true) : ['—', null])+
+    row('Sesiones', c.n, dNum(c.n, d.n ? d.n : null, v => v, true))+
+    row('Intensidad media', c.rpe.toFixed(1), d.rpe !== null ? dNum(+c.rpe.toFixed(1), +d.rpe.toFixed(1), v => v.toFixed(1), null) : ['—', null])+
+    (c.sp || d.sp ? row('Sparrings', c.sp, dNum(c.sp, d.sp, v => v, null)) : '')+
+    (pa !== null ? row('Peso', kgF(pa)+' kg', pb !== null ? dNum(pa, pb, v => kgF(v)+' kg', null) : ['—', null]) : '')+
+    '</div>' : '<div class="empty">Sin sesiones ese mes.</div>';
+  const aport = live(S.data.metas).reduce((acc, mt) => acc + (mt.aportes || []).filter(x => x.f.slice(0,7) === m).reduce((s2, x) => s2 + (+x.m||0), 0), 0);
+  if (aport) h += '<div class="sgroup">Metas</div><div class="cmp">'+row('Ahorraste en metas', fmtARS(aport), ['', null])+'</div>';
+  return h;
+}
+function openCierre(m){ S.cierreMes = m; openSheet('sh-cierre'); }
+
+/* ---------- Peso: gráfico ---------- */
+function pesoChart(){
+  const ps = pesos().filter(p => p.fecha >= addDays(todayISO, -182));
+  if (ps.length < 2) return '<div class="empty">Con dos registros aparece la línea de tu peso.</div>';
+  const W = 520, H = 170, L = 44, R = 14, T = 12, B = 24, iw = W-L-R, ih = H-T-B;
+  const t0 = parseISO(ps[0].fecha).getTime(), t1 = Math.max(parseISO(ps[ps.length-1].fecha).getTime(), t0 + 864e5);
+  let lo = Math.min(...ps.map(p => +p.kg)), hi = Math.max(...ps.map(p => +p.kg));
+  if (hi - lo < 2){ const c = (hi + lo) / 2; lo = c - 1; hi = c + 1; }
+  const x = f => L + iw * (parseISO(f).getTime() - t0) / (t1 - t0), y = v => T + ih - ih * (v - lo) / (hi - lo);
+  let g = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Tu peso en los últimos meses">';
+  [lo, (lo + hi) / 2, hi].forEach(v => { g += '<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/><text class="ax" x="'+(L-6)+'" y="'+(y(v)+4).toFixed(1)+'" text-anchor="end">'+kgF(v)+'</text>'; });
+  g += '<polyline class="pline" points="'+ps.map(p => x(p.fecha).toFixed(1)+','+y(+p.kg).toFixed(1)).join(' ')+'"/>';
+  ps.forEach((p, i) => { g += '<circle class="pdot" cx="'+x(p.fecha).toFixed(1)+'" cy="'+y(+p.kg).toFixed(1)+'" r="'+(i === ps.length-1 ? 4.5 : 2.5)+'"><title>'+shortDate(p.fecha)+': '+kgF(p.kg)+' kg</title></circle>'; });
+  g += '<text class="ax" x="'+L+'" y="'+(H-5)+'">'+shortDate(ps[0].fecha)+'</text><text class="ax" x="'+(W-R)+'" y="'+(H-5)+'" text-anchor="end">'+shortDate(ps[ps.length-1].fecha)+'</text>';
+  return g + '</svg>';
+}
+
+/* ---------- Render de todo lo nuevo ---------- */
+function renderExtras(){
+  // Finanzas: cierre y copia, solo cuando corresponde
+  const fa = $('#finAlerts'), bd = backupDue(), cm = cierrePendiente();
+  let extra = '';
+  if (cm) extra += '<button type="button" class="alert" data-cierre="'+cm+'"><i class="d ok"></i><span>Cierre de '+MESES[+cm.slice(5)-1]+': mirá cómo te fue</span>'+CHEV+'</button>';
+  if (bd) extra += '<button type="button" class="alert" data-backup><i class="d"></i><span>Hace '+bd+' días que no hacés una copia. Tocá para guardarla.</span>'+CHEV+'</button>';
+  if (extra){ fa.insertAdjacentHTML('afterbegin', extra); fa.hidden = false; }
+
+  // Metas en la pantalla principal (solo si hay)
+  const metas = live(S.data.metas), ord = metas.slice().sort((a,b) => (metaAhorrado(a) >= +a.objetivo) - (metaAhorrado(b) >= +b.objetivo));
+  $('#metasSec').hidden = !metas.length;
+  const metaBar = mt => { const ah = metaAhorrado(mt), pct = mt.objetivo > 0 ? Math.min(1, ah / mt.objetivo) : 0, ok = ah >= +mt.objetivo;
+    return '<button type="button" class="bar btn" data-meta-id="'+esc(mt.id)+'"><span>'+esc(mt.nombre)+(ok ? ' <span style="color:var(--accent)">✓</span>' : '')+'</span><span class="v">'+fmtARS(ah)+' / '+fmtARS(mt.objetivo)+'</span><div class="t"><i class="acc" style="width:'+(pct*100)+'%"></i></div></button>'; };
+  $('#metasMain').innerHTML = ord.slice(0, 3).map(metaBar).join('');
+  $('#metasMore').textContent = metas.length > 3 ? 'Todas ('+metas.length+')' : '';
+  $('#metasList').innerHTML = metas.length ? ord.map(metaBar).join('') : '<div class="empty">Ponele nombre y monto a algo que quieras comprar o juntar.</div>';
+  $('#mMetas').textContent = metas.filter(mt => metaAhorrado(mt) < +mt.objetivo).length || '';
+
+  // Meta (detalle / nueva)
+  const em = S.editMeta ? getRec('metas', S.editMeta) : null;
+  $('#metaTitle').textContent = em ? em.nombre : 'Nueva meta';
+  $('#metaProg').hidden = !em; $('#aporteForm').hidden = !em; $('#metaDel').hidden = !em;
+  if (em){
+    const ah = metaAhorrado(em), pct = em.objetivo > 0 ? ah / em.objetivo : 0, falta = Math.max(0, em.objetivo - ah);
+    const ult = (em.aportes || []).slice(-4).reverse();
+    $('#metaProg').innerHTML = '<div class="hero-num" style="font-size:40px">'+fmtARS(ah)+'</div>'+
+      '<div class="meter"><i style="width:'+Math.min(100, pct*100)+'%"></i></div>'+
+      '<div class="meter-l"><span>'+Math.round(pct*100)+'% de '+fmtARS(em.objetivo)+'</span><span>'+(falta ? 'faltan '+fmtARS(falta) : '¡lograda!')+'</span></div>'+
+      (ult.length ? '<p class="fine" style="margin-top:10px">'+ult.map(x => shortDate(x.f)+' '+(x.m < 0 ? '−' : '+')+fmtARS(Math.abs(x.m))).join(' · ')+'</p>' : '');
+  }
+  $('#metaSubmit').textContent = em ? 'Guardar cambios' : 'Crear meta';
+
+  // Entreno: peso y sobrecarga, solo cuando corresponde
+  const wk = weekStart(todayISO), ps = pesos(), pesoSemana = ps.some(p => p.fecha >= wk), li = loadInfo();
+  const INS = window.ApexReminders ? ApexReminders.insights(S.data, todayISO) : {entreno: [], finanzas: []};
+  const ACT = {fijos: 'data-open="sh-due"', cobro: 'data-open="sh-cobros"', carga: 'data-open="sh-carga"', peso: 'data-peso-new', racha: 'data-ses-new', habito: 'data-ses-new', pausa: 'data-ses-new', plan: 'data-ses-new', presupuesto: 'data-open="sh-budget"', ritmo: 'data-open="sh-hist6"', registro: 'data-mov-new'};
+  const dotc = x => (x.k === 'carga' && x.p >= 90) || (x.k === 'presupuesto' && x.p >= 75) || x.k === 'racha' || (x.k === 'cobro' && x.p >= 85) ? ' bad' : (x.k === 'peso' || x.k === 'plan') ? ' ok' : '';
+  const insRow = x => '<button type="button" class="alert ins" '+ACT[x.k]+'><i class="d'+dotc(x)+'"></i><span><b>'+esc(x.title)+'</b><small>'+esc(x.body)+'</small></span>'+CHEV+'</button>';
+  fa.querySelectorAll('[data-open="sh-due"],[data-open="sh-cobros"]').forEach(n => n.remove());
+  const finIns = INS.finanzas.filter(x => ACT[x.k]).slice(0, 3).map(insRow).join('');
+  if (finIns) fa.insertAdjacentHTML('beforeend', finIns);
+  fa.hidden = !fa.children.length;
+  const ea = INS.entreno.slice(0, 2).map(insRow).join('');
+  $('#entAlerts').innerHTML = ea; $('#entAlerts').hidden = !ea;
+
+  // Peso (hoja)
+  const last = ps[ps.length-1];
+  $('#mPeso').textContent = last ? kgF(last.kg)+' kg' : '';
+  const hace30 = ps.filter(p => p.fecha <= addDays(todayISO, -28)).pop();
+  $('#pResumen').textContent = last ? 'Último: '+kgF(last.kg)+' kg'+(hace30 ? ' · '+(last.kg - hace30.kg >= 0 ? '+' : '−')+kgF(Math.abs(last.kg - hace30.kg))+' kg en un mes' : '') : '';
+  $('#pesoChart').innerHTML = pesoChart();
+  $('#pesoList').innerHTML = ps.slice(-8).reverse().map((p, i, arr) => { const prev = arr[i+1];
+    return '<button type="button" class="row" data-peso-id="'+esc(p.id)+'"><span class="t">'+kgF(p.kg)+' kg</span><span class="s">'+shortDate(p.fecha)+'</span><span class="v">'+(prev ? (p.kg - prev.kg >= 0 ? '+' : '−')+kgF(Math.abs(p.kg - prev.kg)) : '')+'</span></button>'; }).join('');
+  $('#pSkip').hidden = !!S.editPeso || pesoSemana;
+  $('#pDel').hidden = !S.editPeso;
+
+  // Carga (hoja)
+  $('#cargaNum').innerHTML = li.cur.toLocaleString('es-AR')+'<span class="unit">esta semana</span>';
+  $('#cargaTxt').textContent = li.avg === null ? 'Necesito al menos 3 semanas con entrenamientos para comparar.' :
+    'Promedio de tus 4 semanas anteriores: '+Math.round(li.avg).toLocaleString('es-AR')+'. '+
+    (li.ratio >= 1.5 ? 'Subiste mucho de golpe: hacé el próximo entrenamiento suave o tomate un día de descanso.' : li.ratio >= 1.3 ? 'Vas por encima de lo habitual. Si sentís cansancio o dolores, bajá la intensidad.' : 'Estás dentro de tu rango habitual.');
+  const wks = [5,4,3,2,1,0].map(k => addDays(wk, -7*k)), vals = wks.map(weekLoad);
+  const top = niceMax(Math.max(1, ...vals, li.avg || 0));
+  const W = 520, H = 160, L = 10, R = 54, T = 14, B = 24, iw = W-L-R, ih = H-T-B, gw = iw/6, bw = Math.min(34, gw*.5), yOf = v => T + ih - ih*v/top;
+  let g = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Carga de las últimas 6 semanas"><line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+yOf(0)+'" y2="'+yOf(0)+'"/>';
+  wks.forEach((w0, i) => { const v = vals[i], cx = L + gw*i + gw/2, h = ih*v/top, cur = w0 === wk;
+    g += '<rect class="'+(cur ? (li.ratio >= 1.3 ? 'b-warn' : 'b-hit') : 'b-miss')+'" x="'+(cx-bw/2)+'" y="'+(T+ih-h)+'" width="'+bw+'" height="'+Math.max(0,h)+'" rx="3"><title>'+v+'</title></rect>';
+    g += '<text class="ax'+(cur ? ' cur' : '')+'" x="'+cx+'" y="'+(H-5)+'" text-anchor="middle">'+(cur ? 'esta' : parseISO(w0).getDate()+'/'+(parseISO(w0).getMonth()+1))+'</text>'; });
+  if (li.avg) g += '<line class="goal" x1="'+L+'" x2="'+(W-R)+'" y1="'+yOf(li.avg)+'" y2="'+yOf(li.avg)+'"/><text class="goal-t" x="'+(W-R+6)+'" y="'+(yOf(li.avg)+4)+'">prom.</text>';
+  $('#cargaChart').innerHTML = g + '</svg>';
+
+  // Sparrings (hoja y menú)
+  const sps = live(S.data.sesiones).filter(x => x.sparring).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  $('#mSparr').textContent = sps.length || '';
+  $('#sparrList').innerHTML = sps.length ? sps.map(x => { const sp = x.sparring;
+    return '<button type="button" class="row" data-ses="'+esc(x.id)+'"><span class="t">'+(sp.con ? 'Con '+esc(sp.con) : 'Sparring')+(sp.rounds ? ' · '+(+sp.rounds)+' rounds' : '')+'</span><span class="s">'+shortDate(x.fecha)+(sp.costo ? ' · '+esc(sp.costo) : '')+'</span><span class="v">'+esc(tipoShort(x.tipo))+'</span></button>'; }).join('')
+    : '<div class="empty">Al cargar una sesión, activá "Hubo sparring" y anotá con quién y qué te costó.</div>';
+
+  // Cierre (hoja)
+  const cmM = S.cierreMes || addMonths(mk(TODAY), -1);
+  $('#cierreTitle').textContent = 'Cierre de '+MESES[+cmM.slice(5)-1];
+  $('#cierreBody').innerHTML = cierreHTML(cmM);
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-cierre]'); if (c){ lsSet(CIERRE_KEY, c.dataset.cierre); return openCierre(c.dataset.cierre); }
+  if (e.target.closest('[data-backup]')) return $('#expBtn').click();
+  if (e.target.closest('[data-peso-new]') || e.target.closest('#pesoBtn')) return openPeso(null);
+  if (e.target.closest('[data-ses-new]')) return openSes(null, {fecha: todayISO});
+  if (e.target.closest('[data-mov-new]')) return openMov(null);
+  const pid = e.target.closest('[data-peso-id]'); if (pid) return openPeso(pid.dataset.pesoId);
+  const mid = e.target.closest('[data-meta-id]'); if (mid) return openMeta(mid.dataset.metaId);
+  if (e.target.closest('#metaNew')) return openMeta(null);
+  if (e.target.closest('#cierreBtnF') || e.target.closest('#cierreBtnE')) return openCierre(S.month < mk(TODAY) ? S.month : addMonths(mk(TODAY), -1));
+});
+$('#sparrList').addEventListener('click', e => { const r = e.target.closest('[data-ses]'); if (r){ e.stopPropagation(); openSes(r.dataset.ses); } });
+
+/* peso */
+function openPeso(id){
+  const p = id ? getRec('pesos', id) : null;
+  S.editPeso = p ? p.id : null;
+  const last = pesos().pop();
+  $('#pKg').value = p ? p.kg : ''; $('#pKg').placeholder = last ? kgF(last.kg) : '0,0';
+  $('#pFecha').value = p ? p.fecha : todayISO; disarm($('#pDel'));
+  openSheet('sh-peso');
+  if (!p) setTimeout(() => $('#pKg').focus(), 250);
+}
+$('#pesoForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const kg = parseFloat(String($('#pKg').value).replace(',', '.')), fecha = $('#pFecha').value;
+  if (!(kg >= 25 && kg <= 300)) return toast('Poné tu peso en kilos, por ejemplo 72,5.');
+  if (!fecha) return toast('Elegí una fecha.');
+  const base = S.editPeso ? getRec('pesos', S.editPeso) : null;
+  upsert('pesos', Object.assign({}, base || {id: uid()}, {kg: Math.round(kg*10)/10, fecha}));
+  S.editPeso = null; $('#pKg').value = ''; commit(); toast(base ? 'Peso corregido' : 'Peso guardado: '+kgF(kg)+' kg');
+});
+$('#pSkip').addEventListener('click', () => { setCfg({pesoSkip: weekStart(todayISO)}); closeSheet(); });
+$('#pDel').addEventListener('click', e => armOr(e.currentTarget, () => { const id = S.editPeso; S.editPeso = null; tomb('pesos', id); $('#pKg').value = ''; commit(); toast('Registro borrado'); }));
+
+/* metas */
+function openMeta(id){
+  const m = id ? getRec('metas', id) : null;
+  S.editMeta = m ? m.id : null;
+  $('#mNombre').value = m ? m.nombre : ''; $('#mObjetivo').value = m ? m.objetivo : ''; $('#aMonto').value = '';
+  disarm($('#metaDel'));
+  openSheet('sh-meta');
+  if (!m) setTimeout(() => $('#mNombre').focus(), 250);
+}
+$('#metaForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const nombre = $('#mNombre').value.trim(), objetivo = parseFloat($('#mObjetivo').value);
+  if (!nombre || !(objetivo > 0)) return toast('Poné un nombre y cuánto querés juntar.');
+  const base = S.editMeta ? getRec('metas', S.editMeta) : null;
+  const rec = Object.assign({}, base || {id: uid(), aportes: []}, {nombre, objetivo});
+  upsert('metas', rec); S.editMeta = rec.id; commit(); toast(base ? 'Meta actualizada' : 'Meta creada. Sumale cuando ahorres.');
+});
+function aporte(sign){
+  const m = getRec('metas', S.editMeta), v = parseFloat($('#aMonto').value);
+  if (!m) return; if (!(v > 0)) return toast('Poné un monto.');
+  const antes = metaAhorrado(m);
+  upsert('metas', Object.assign({}, m, {aportes: [...(m.aportes || []), {id: uid(), f: todayISO, m: sign * v}]}));
+  $('#aMonto').value = ''; commit();
+  const ahora = antes + sign * v;
+  toast(sign > 0 && antes < m.objetivo && ahora >= m.objetivo ? '¡Llegaste a la meta '+m.nombre+'!' : (sign > 0 ? 'Sumaste ' : 'Retiraste ')+fmtARS(v));
+}
+$('#aAdd').addEventListener('click', () => aporte(1));
+$('#aSub').addEventListener('click', () => aporte(-1));
+$('#metaDel').addEventListener('click', e => armOr(e.currentTarget, () => { const id = S.editMeta; S.editMeta = null; tomb('metas', id); closeSheet(); commit(); toast('Meta borrada'); }));
+
+/* sparring en la hoja de sesión */
+function setSp(on, sp){
+  $('#eSpOn').setAttribute('aria-checked', String(!!on)); $('#eSpWrap').hidden = !on;
+  sp = sp || {}; $('#eSpCon').value = sp.con || ''; $('#eSpRounds').value = sp.rounds || ''; $('#eSpCosto').value = sp.costo || '';
+}
+function getSp(){
+  if ($('#eSpOn').getAttribute('aria-checked') !== 'true') return null;
+  return {con: $('#eSpCon').value.trim(), rounds: parseInt($('#eSpRounds').value, 10) || null, costo: $('#eSpCosto').value.trim()};
+}
+$('#eSpOn').addEventListener('click', () => { const on = $('#eSpOn').getAttribute('aria-checked') !== 'true'; $('#eSpOn').setAttribute('aria-checked', String(on)); $('#eSpWrap').hidden = !on; if (on) setTimeout(() => $('#eSpCon').focus(), 50); });
 
 /* ================= Paneles ================= */
 let openSh = null;
@@ -1321,7 +1659,7 @@ function resetSesForm(o){
   o = o || {}; S.editSes = null; S.selObj = new Set(); S.minTouched = false;
   const fecha = o.fecha || S.selDay || todayISO, planD = cfg().plan[dowMon(fecha)] || [];
   S.entTipo = o.tipo || planD[0] || S.entTipo || 'kick';
-  $('#eNota').value = ''; $('#eMin').value = lastMin(S.entTipo); $('#eRpe').value = 7; $('#eRpeOut').textContent = '7'; $('#eFecha').value = fecha;
+  setSp(false); $('#eNota').value = ''; $('#eMin').value = lastMin(S.entTipo); $('#eRpe').value = 7; $('#eRpeOut').textContent = '7'; $('#eFecha').value = fecha;
   disarm($('#eDel'));
 }
 function openSes(id, o){
@@ -1329,7 +1667,7 @@ function openSes(id, o){
     if (entSample()) return toast('Es una sesión de ejemplo. Registrá las tuyas con +.');
     const x = getRec('sesiones', id); if (!x) return;
     S.editSes = x.id; S.entTipo = x.tipo; S.selObj = new Set(x.obj || []);
-    $('#eFecha').value = x.fecha; $('#eMin').value = x.min; $('#eRpe').value = x.rpe; $('#eRpeOut').textContent = x.rpe; $('#eNota').value = x.nota || '';
+    $('#eFecha').value = x.fecha; $('#eMin').value = x.min; $('#eRpe').value = x.rpe; $('#eRpeOut').textContent = x.rpe; $('#eNota').value = x.nota || ''; setSp(!!x.sparring, x.sparring);
   } else resetSesForm(o);
   openSheet('sh-ses');
 }
@@ -1360,7 +1698,7 @@ $('#entForm').addEventListener('submit', e => {
   if (!fecha) return toast('Elegí una fecha.');
   if (!(min > 0)) return toast('Poné cuántos minutos entrenaste.');
   const base = S.editSes ? getRec('sesiones', S.editSes) : null;
-  upsert('sesiones', Object.assign({}, base || {id: uid()}, {fecha, tipo: S.entTipo, min, rpe: +$('#eRpe').value, nota: $('#eNota').value.trim(), obj: [...S.selObj]}));
+  upsert('sesiones', Object.assign({}, base || {id: uid()}, {fecha, tipo: S.entTipo, min, rpe: +$('#eRpe').value, nota: $('#eNota').value.trim(), obj: [...S.selObj], sparring: getSp()}));
   S.selDay = fecha <= todayISO && weekStart(fecha) === weekStart(todayISO) ? fecha : S.selDay;
   S.editSes = null; closeSheet(); commit(); toast(base ? 'Guardado' : tipoName(S.entTipo)+' cargado'+(fecha === todayISO ? ' para hoy' : fecha === addDays(todayISO, -1) ? ' para ayer' : ' el '+dayLabel(fecha)));
 });
@@ -1678,7 +2016,8 @@ $('#rEntHora').addEventListener('change', e => { const r = clone(cfg().rec); r.e
 $('#rFinHora').addEventListener('change', e => { const r = clone(cfg().rec); r.finanzas.hora = e.target.value || r.finanzas.hora; setCfg({rec: r}); });
 $('#rTest').addEventListener('click', async () => {
   if (!(await ensurePerm())) return;
-  try { const reg = swReg || await navigator.serviceWorker.ready; await reg.showNotification('Apex Hunter', {body: 'Así te van a llegar los recordatorios.', icon: 'icon-192.png', badge: 'badge-96.png', tag: 'prueba'}); }
+  try { const reg = swReg || await navigator.serviceWorker.ready; const ins = ApexReminders.insights(S.data, todayISO), pick = [...ins.entreno, ...ins.finanzas].filter(x => x.push !== false).sort((a,b) => b.p - a.p)[0];
+    await reg.showNotification(pick ? pick.title : 'Apex Hunter', {body: pick ? pick.body : 'Hoy no tengo nada importante para avisarte. Cuando haya un motivo concreto, te escribo.', icon: 'icon-192.png', badge: 'badge-96.png', tag: 'prueba'}); }
   catch(_){ toast('No se pudo mostrar la notificación.'); }
 });
 
@@ -1687,7 +2026,7 @@ $('#expBtn').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(Object.assign({exportado: new Date().toISOString()}, S.data), null, 2)], {type: 'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'apex-hunter-'+todayISO+'.json';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  toast('Copia exportada');
+  lsSet(EXP_KEY, now()); toast('Copia guardada en Descargas'); render();
 });
 $('#impBtn').addEventListener('click', () => $('#impFile').click());
 $('#impFile').addEventListener('change', e => {
@@ -1822,6 +2161,7 @@ setInterval(() => { if (unlockedOnce && document.visibilityState === 'visible') 
 function startBackground(){ syncNow(); loadTC(false); }
 const h0 = location.hash.slice(1); if (h0 === 'entreno' || h0 === 'finanzas') S.tab = h0;
 loadLocal();
+if (!lsGet(FIRST_KEY)) lsSet(FIRST_KEY, now());
 S.usd = !!lsGet('apexHunter.usd');
 S.tc = (lsGet(TC_KEY) && lsGet(TC_KEY).casa === (cfg().dolar || 'blue')) ? lsGet(TC_KEY) : null;
 resetMovForm(); resetSesForm(); setFijoTipo('gasto');
