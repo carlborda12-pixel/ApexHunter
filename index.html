@@ -107,7 +107,10 @@ button.row:hover .t{color:var(--accent)}
 
 /* ---------- Entreno hero ---------- */
 .dots{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px;max-width:380px}
-.dots div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3)}
+.dots>*{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3);border:0;background:none;padding:4px 0;border-radius:10px;min-width:0}
+.dots button:disabled{cursor:default;opacity:.45}
+.dots .sel{color:var(--ink);font-weight:600}
+.dots .sel i{outline:2px solid var(--ink-2);outline-offset:3px}
 .dots i{width:100%;max-width:30px;aspect-ratio:1;border-radius:50%;border:1.5px solid var(--line-2);display:block}
 .dots .done i{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--glow)}
 .dots .plan i{border-style:dashed;border-color:var(--ink-3)}
@@ -120,6 +123,20 @@ button.row:hover .t{color:var(--accent)}
 .cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--line-2);background:transparent;border-radius:12px;height:48px;padding:0 18px;font-weight:600;font-size:15px;margin-top:16px;align-self:flex-start}
 .cta:hover{border-color:var(--accent);color:var(--accent)}
 .cta .ic{color:var(--accent)}
+
+/* ---------- Día de entrenamiento ---------- */
+.day-ok{font-size:14px;color:var(--accent)}
+.acts-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.act{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:10px;border:1px solid var(--line-2);background:transparent;border-radius:14px;padding:12px;min-height:88px;text-align:left;color:var(--ink);min-width:0}
+.act:hover{border-color:var(--ink-3)}
+.act .ic{width:22px;height:22px;color:var(--ink-2)}
+.act span{font-size:14px;font-weight:500;line-height:1.2;overflow-wrap:anywhere}
+.act small{display:block;font-size:12px;color:var(--ink-3);font-family:var(--mono);font-stretch:85%;margin-top:3px}
+.act.plan{border-style:dashed;border-color:var(--ink-3)}
+.act.on{background:var(--accent-soft);border:1px solid var(--accent)}
+.act.on .ic,.act.on small{color:var(--accent)}
+.day .cta{margin-top:6px}
+.mins .chip{min-width:52px;text-align:center}
 
 /* ---------- Bottom nav ---------- */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 20px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,rgba(7,12,21,0))}
@@ -343,6 +360,9 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
   <symbol id="i-dollar" viewBox="0 0 24 24"><path d="M12 3v18M16.5 7.5c-.8-1.3-2.5-2-4.5-2-2.5 0-4 1.3-4 3s1.5 2.6 4 3 4 1.3 4 3.1-1.7 3.1-4.2 3.1c-2.1 0-3.8-.8-4.5-2.2"/></symbol>
+  <symbol id="i-glove" viewBox="0 0 24 24"><path d="M8 13V8a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v5a4 4 0 0 1-4 4h-5a2 2 0 0 1-2-2z"/><path d="M8 12H6.5a2 2 0 0 1 0-4H8"/><path d="M9 17v4h7v-4"/></symbol>
+  <symbol id="i-kick" viewBox="0 0 24 24"><circle cx="9" cy="4.5" r="2"/><path d="M9 8v6l-3 7"/><path d="M9 14l11-3"/><path d="M5 10l4-2 4 2"/></symbol>
+  <symbol id="i-shoe" viewBox="0 0 24 24"><path d="M3 17h17.5a.5.5 0 0 0 .5-.5V15a2 2 0 0 0-1.5-1.9L14 11.5l-2-4.5H8l.5 4L3 13z"/><path d="M3 17v2h18v-2.5"/><path d="M10 10h2M11 12.5h2"/></symbol>
 </defs></svg>
 
 <!-- ======= BLOQUEO ======= -->
@@ -429,8 +449,14 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
 
   <main id="entView" class="wrap" style="gap:28px" hidden>
     <section class="hero" id="entHero"></section>
+    <section class="sec day">
+      <div class="sec-h"><span id="dayTitle" style="font-size:15px;color:var(--ink)"></span><span id="dayPlan"></span></div>
+      <div class="day-ok" id="dayOk" hidden></div>
+      <div class="acts-grid" id="actGrid"></div>
+      <button type="button" class="cta" data-timer><svg class="ic"><use href="#i-timer"/></svg>Temporizador de rounds</button>
+    </section>
     <section class="sec">
-      <div class="sec-h"><span>Sesiones</span><span id="entCount"></span></div>
+      <div class="sec-h"><span id="sesMonthT">Sesiones del mes</span><span id="entCount"></span></div>
       <div class="list" id="entList"></div>
     </section>
   </main>
@@ -471,6 +497,7 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
   <div class="sh-h"><h2 id="sesTitle">Nueva sesión</h2><button type="button" class="icbtn" data-close aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button></div>
   <form id="entForm" autocomplete="off">
     <div class="chips" id="eTipos" role="group" aria-label="Tipo de entrenamiento"></div>
+    <div class="stack" style="gap:8px"><span class="eyebrow" style="font-size:12.5px">Cuánto tiempo</span><div class="chips mins" id="eMinChips"></div></div>
     <div class="two">
       <label class="f">Minutos<input type="number" id="eMin" min="1" max="600" value="60" required></label>
       <label class="f">Fecha<input type="date" id="eFecha" required></label>
@@ -481,8 +508,7 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
     <div class="stack" id="eObjWrap" style="gap:8px"><span class="eyebrow" style="font-size:12.5px">Trabajé en</span><div class="chips" id="eObjs"></div></div>
     <label class="f">Nota<input type="text" id="eNota" maxlength="120" placeholder="Opcional"></label>
     <button class="primary" type="submit" id="eSubmit">Guardar</button>
-    <button type="button" class="linkish" id="timerBtn2">Usar el temporizador de rounds</button>
-    <button type="button" class="danger" id="eDel" hidden>Borrar sesión</button>
+        <button type="button" class="danger" id="eDel" hidden>Borrar sesión</button>
   </form>
 </section>
 
@@ -566,6 +592,7 @@ body.locked .wrap,body.locked .nav{visibility:hidden}
     <button type="button" data-open="sh-rec"><svg class="ic"><use href="#i-trophy"/></svg><span>Récords</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
     <button type="button" data-open="sh-hist"><svg class="ic"><use href="#i-chart"/></svg><span>Historial</span><svg class="ic chev"><use href="#i-chev"/></svg></button>
   </div>
+  <button type="button" class="danger" id="resetMonth" style="margin-top:10px"></button>
 </section>
 
 <section class="sheet" id="sh-plan" role="dialog" aria-modal="true" aria-label="Plan semanal">
@@ -767,7 +794,7 @@ function sampleSes(){
 }
 let SAMPLE_MOVS = sampleMovs(), SAMPLE_SES = sampleSes();
 const finSample = () => S.data.movs.length === 0;
-const entSample = () => S.data.sesiones.length === 0;
+const entSample = () => false;
 const movs = () => finSample() ? SAMPLE_MOVS : live(S.data.movs);
 const sesiones = () => entSample() ? SAMPLE_SES : live(S.data.sesiones);
 
@@ -1000,27 +1027,42 @@ function weekData(){
   ses.forEach(x => { const w = weekStart(x.fecha); (byW[w] = byW[w] || new Set()).add(x.fecha); });
   return byW;
 }
+const TIPO_IC = {kick:'kick', box:'glove', func:'bolt', run:'shoe', fuerza:'dumbbell', otro:'plus'};
+const dayLabel = f => f === todayISO ? 'hoy' : f === addDays(todayISO, -1) ? 'ayer' : DIAS_LARGO[parseISO(f).getDay()]+' '+parseISO(f).getDate();
+function lastMin(tipo){ const l = live(S.data.sesiones).filter(x => x.tipo === tipo).sort((a,b) => b.fecha.localeCompare(a.fecha) || ((b.upd||0)-(a.upd||0)))[0]; return l ? +l.min : 60; }
 function renderEntMain(){
   const ses = sesiones(), meta = cfg().metaSemanal, byW = weekData();
   const wk = weekStart(todayISO), n = byW[wk] ? byW[wk].size : 0;
+  if (!S.selDay || S.selDay > todayISO || weekStart(S.selDay) !== wk) S.selDay = todayISO;
   let streak = 0, w = n >= meta ? wk : addDays(wk, -7);
   while (byW[w] && byW[w].size >= meta){ streak++; w = addDays(w, -7); }
   const mMin = ses.filter(x => x.fecha.slice(0,7) === mk(TODAY)).reduce((a,x) => a + (+x.min||0), 0);
-  const plan = cfg().plan, ph = planHoy(), hecho = ses.some(x => x.fecha === todayISO);
+  const plan = cfg().plan;
   let dots = '';
   for (let i = 0; i < 7; i++){
-    const f = addDays(wk, i), done = byW[wk] && byW[wk].has(f), p = (plan[i] || []).length;
-    dots += '<div class="'+(done ? 'done ' : '')+(p ? 'plan ' : '')+(f === todayISO ? 'today' : '')+'" title="'+((plan[i]||[]).map(tipoName).join(' + ') || 'Descanso')+'"><i></i>'+DIAS[i]+'</div>';
+    const f = addDays(wk, i), done = byW[wk] && byW[wk].has(f), p = (plan[i] || []).length, fut = f > todayISO;
+    dots += '<button type="button" data-day="'+f+'" class="'+(done ? 'done ' : '')+(p ? 'plan ' : '')+(f === todayISO ? 'today ' : '')+(f === S.selDay ? 'sel' : '')+'"'+(fut ? ' disabled' : '')+' aria-label="'+DIAS_LARGO[parseISO(f).getDay()]+' '+parseISO(f).getDate()+(done ? ', entrenaste' : '')+'"><i></i>'+DIAS[i]+'</button>';
   }
-  const hoyTxt = hecho ? 'Hoy ya entrenaste. Bien ahí.' : ph.length ? 'Hoy toca <b>'+esc(ph.map(tipoName).join(' + '))+'</b>' : (Object.values(plan).some(a => a.length) ? 'Hoy es día de descanso' : '');
   $('#entHero').innerHTML =
-    '<div class="eyebrow">Esta semana</div>'+
+    '<div class="eyebrow">Días entrenados esta semana</div>'+
     '<div class="hero-num '+(n >= meta ? 'pos' : '')+'">'+n+'<span style="color:var(--ink-3)">/'+meta+'</span></div>'+
-    '<div class="hero-sub"><span>Racha <b>'+streak+'</b> '+(streak === 1 ? 'semana' : 'semanas')+'</span><span><b>'+hm(mMin)+'</b> este mes</span></div>'+
-    '<div class="dots">'+dots+'</div>'+
-    (hoyTxt ? '<div class="hoy">'+hoyTxt+'</div>' : '')+
-    '<button type="button" class="cta" data-timer><svg class="ic"><use href="#i-timer"/></svg>Rounds</button>'+
-    (entSample() ? '<div class="sample" style="margin-top:14px">Sesiones de ejemplo hasta que registres la primera</div>' : '');
+    '<div class="hero-sub"><span>Racha <b>'+streak+'</b> '+(streak === 1 ? 'semana' : 'semanas')+'</span><span><b>'+hm(mMin)+'</b> en '+MESES[TODAY.getMonth()]+'</span></div>'+
+    '<div class="dots">'+dots+'</div>';
+
+  // el día elegido
+  const d = S.selDay, delDia = ses.filter(x => x.fecha === d);
+  const planD = plan[dowMon(d)] || [];
+  $('#dayTitle').textContent = d === todayISO ? '¿Qué hiciste hoy?' : d === addDays(todayISO, -1) ? '¿Qué hiciste ayer?' : '¿Qué hiciste el '+dayLabel(d)+'?';
+  $('#dayPlan').textContent = planD.length ? (d === todayISO ? 'Toca ' : 'Tocaba ')+planD.map(tipoShort).join(' + ') : '';
+  const totDia = delDia.reduce((a,x) => a + (+x.min||0), 0);
+  $('#dayOk').hidden = !delDia.length;
+  $('#dayOk').textContent = delDia.length ? '✓ '+(d === todayISO ? 'Hoy' : dayLabel(d).replace(/^./, c => c.toUpperCase()))+' entrenaste '+hm(totDia)+'. Tocá para corregir o sumá otra.' : '';
+  $('#actGrid').innerHTML = TIPOS.map(t => {
+    const hechos = delDia.filter(x => x.tipo === t.k), min = hechos.reduce((a,x) => a + (+x.min||0), 0);
+    return '<button type="button" class="act'+(hechos.length ? ' on' : planD.includes(t.k) ? ' plan' : '')+'" data-act="'+t.k+'"'+(hechos.length ? ' data-edit="'+esc(hechos[hechos.length-1].id)+'"' : '')+'>'+
+      '<svg class="ic"><use href="#i-'+TIPO_IC[t.k]+'"/></svg><span>'+esc(t.n)+(hechos.length ? '<small>✓ '+min+' min</small>' : '')+'</span></button>';
+  }).join('');
+  $('#sesMonthT').textContent = 'Sesiones de '+MESES[+S.month.slice(5)-1];
 
   const m = S.month, list = ses.filter(x => x.fecha.slice(0,7) === m).sort((a,b) => b.fecha.localeCompare(a.fecha) || ((b.upd||0) - (a.upd||0)));
   const objName = id => { const o = S.data.objetivos.find(x => x.id === id && !x.del); return o ? o.nombre : null; };
@@ -1031,7 +1073,7 @@ function renderEntMain(){
     const sub = [shortDate(x.fecha), on.join(', '), x.nota || ''].filter(Boolean).join(' · ');
     return '<button type="button" class="row" data-ses="'+esc(x.id)+'"><span class="t">'+esc(tipoName(x.tipo))+'</span><span class="s">'+esc(sub)+'</span><span class="v">'+(+x.min)+' min<small>intensidad '+(+x.rpe)+'</small></span></button>';
   }).join('') + (list.length > 12 ? '<button type="button" class="more" id="sesAll">'+(S.sesAll ? 'Ver menos' : 'Ver las '+list.length)+'</button>' : '')
-  : '<div class="empty">Sin sesiones en '+MESES[+m.slice(5)-1]+'. Tocá + para registrar una.</div>';
+  : '<div class="empty">Todavía no cargaste sesiones en '+MESES[+m.slice(5)-1]+'.</div>';
 }
 
 function renderEntSheets(){
@@ -1094,13 +1136,17 @@ function renderEntSheets(){
   $('#entTypes').innerHTML = arr.length ? arr.map(([k,v]) => '<div class="bar"><span>'+esc(tipoName(k))+'</span><span class="v">'+hm(v.min)+'</span><div class="t"><i class="acc" style="width:'+(v.min/mx*100)+'%"></i></div></div>').join('') : '<div class="empty">Sin sesiones este mes.</div>';
 
   // hoja de sesión
-  $('#sesTitle').textContent = S.editSes ? 'Editar sesión' : 'Nueva sesión';
+  sesTitle();
+  const curMin = +$('#eMin').value;
+  $('#eMinChips').innerHTML = [30,45,60,90,120].map(v => '<button type="button" class="chip" data-min="'+v+'" aria-pressed="'+(v === curMin)+'">'+v+'</button>').join('');
+  const nM = live(S.data.sesiones).filter(x => x.fecha.slice(0,7) === S.month).length, rb = $('#resetMonth');
+  rb.hidden = !nM; rb.classList.remove('armed'); delete rb.dataset.label;
+  rb.textContent = 'Borrar '+(nM === 1 ? 'la sesión' : 'las '+nM+' sesiones')+' de '+MESES[+S.month.slice(5)-1];
   $('#eTipos').innerHTML = TIPOS.map(t => '<button type="button" class="chip" data-tipo="'+t.k+'" aria-pressed="'+(t.k === S.entTipo)+'">'+t.n+'</button>').join('');
   const objsSel = objs.filter(o => o.activo !== false || S.selObj.has(o.id));
   $('#eObjWrap').hidden = !objsSel.length;
   $('#eObjs').innerHTML = objsSel.map(o => '<button type="button" class="chip" data-selobj="'+esc(o.id)+'" aria-pressed="'+S.selObj.has(o.id)+'">'+esc(o.nombre)+'</button>').join('');
   $('#eDel').hidden = !S.editSes;
-  $('#timerBtn2').hidden = !!S.editSes;
 }
 
 /* ================= Estado ================= */
@@ -1152,7 +1198,7 @@ $$('.sheet').forEach(sh => {
   sh.addEventListener('touchmove', e => { if (y0 === null) return; dy = e.touches[0].clientY - y0; if (dy > 0){ sh.style.transform = 'translateY('+dy+'px)'; sh.style.transition = 'none'; } }, {passive: true});
   sh.addEventListener('touchend', () => { sh.style.transition = ''; sh.style.transform = ''; if (y0 !== null && dy > 90) closeSheet(); y0 = null; });
 });
-$('#fab').addEventListener('click', () => S.tab === 'finanzas' ? openMov(null) : openSes(null));
+$('#fab').addEventListener('click', () => S.tab === 'finanzas' ? openMov(null) : openSes(null, {fecha: S.selDay}));
 $('#moreBtn').addEventListener('click', () => openSheet(S.tab === 'finanzas' ? 'sh-finmas' : 'sh-entmas'));
 $('#setBtn').addEventListener('click', () => openSheet('sh-set'));
 
@@ -1270,21 +1316,42 @@ $('#usdSw').addEventListener('click', () => { if (!S.tc) return; S.usd = !S.usd;
 $('#sh-finmas').addEventListener('click', e => { const b = e.target.closest('[data-meta]'); if (b) setCfg({metaAhorro: Math.max(5, Math.min(80, cfg().metaAhorro + (+b.dataset.meta)))}); });
 
 /* ================= Sesiones ================= */
-function resetSesForm(){ S.editSes = null; S.selObj = new Set(); $('#eNota').value = ''; $('#eMin').value = 60; $('#eRpe').value = 7; $('#eRpeOut').textContent = '7'; $('#eFecha').value = defaultDate(); const ph = planHoy(); S.entTipo = ph.length ? ph[0] : (S.entTipo || 'kick'); disarm($('#eDel')); }
-function openSes(id){
+function sesTitle(){ const f = $('#eFecha').value; $('#sesTitle').textContent = S.editSes ? 'Editar sesión' : tipoName(S.entTipo)+(f ? ' · '+dayLabel(f) : ''); }
+function resetSesForm(o){
+  o = o || {}; S.editSes = null; S.selObj = new Set(); S.minTouched = false;
+  const fecha = o.fecha || S.selDay || todayISO, planD = cfg().plan[dowMon(fecha)] || [];
+  S.entTipo = o.tipo || planD[0] || S.entTipo || 'kick';
+  $('#eNota').value = ''; $('#eMin').value = lastMin(S.entTipo); $('#eRpe').value = 7; $('#eRpeOut').textContent = '7'; $('#eFecha').value = fecha;
+  disarm($('#eDel'));
+}
+function openSes(id, o){
   if (id){
     if (entSample()) return toast('Es una sesión de ejemplo. Registrá las tuyas con +.');
     const x = getRec('sesiones', id); if (!x) return;
     S.editSes = x.id; S.entTipo = x.tipo; S.selObj = new Set(x.obj || []);
     $('#eFecha').value = x.fecha; $('#eMin').value = x.min; $('#eRpe').value = x.rpe; $('#eRpeOut').textContent = x.rpe; $('#eNota').value = x.nota || '';
-  } else resetSesForm();
+  } else resetSesForm(o);
   openSheet('sh-ses');
 }
 $('#entList').addEventListener('click', e => {
   if (e.target.closest('#sesAll')){ S.sesAll = !S.sesAll; return render(); }
   const r = e.target.closest('[data-ses]'); if (r) openSes(r.dataset.ses);
 });
-$('#eTipos').addEventListener('click', e => { const b = e.target.closest('[data-tipo]'); if (!b) return; S.entTipo = b.dataset.tipo; $$('#eTipos .chip').forEach(c => c.setAttribute('aria-pressed', String(c === b))); });
+$('#eTipos').addEventListener('click', e => {
+  const b = e.target.closest('[data-tipo]'); if (!b) return;
+  S.entTipo = b.dataset.tipo; $$('#eTipos .chip').forEach(c => c.setAttribute('aria-pressed', String(c === b)));
+  if (!S.editSes && !S.minTouched){ $('#eMin').value = lastMin(S.entTipo); markMin(); }
+  sesTitle();
+});
+function markMin(){ const v = +$('#eMin').value; $$('#eMinChips .chip').forEach(c => c.setAttribute('aria-pressed', String(+c.dataset.min === v))); }
+$('#eMinChips').addEventListener('click', e => { const b = e.target.closest('[data-min]'); if (!b) return; $('#eMin').value = b.dataset.min; S.minTouched = true; markMin(); });
+$('#eMin').addEventListener('input', () => { S.minTouched = true; markMin(); });
+$('#eFecha').addEventListener('change', sesTitle);
+$('#resetMonth').addEventListener('click', e => armOr(e.currentTarget, () => {
+  const lst = live(S.data.sesiones).filter(x => x.fecha.slice(0,7) === S.month), mes = MESES[+S.month.slice(5)-1];
+  lst.forEach(x => tomb('sesiones', x.id)); closeSheet(); commit();
+  toast('Listo: borré '+lst.length+' '+(lst.length === 1 ? 'sesión' : 'sesiones')+' de '+mes+'. Empezás de cero.');
+}));
 $('#eObjs').addEventListener('click', e => { const b = e.target.closest('[data-selobj]'); if (!b) return; const id = b.dataset.selobj; S.selObj.has(id) ? S.selObj.delete(id) : S.selObj.add(id); b.setAttribute('aria-pressed', String(S.selObj.has(id))); });
 $('#eRpe').addEventListener('input', e => $('#eRpeOut').textContent = e.target.value);
 $('#entForm').addEventListener('submit', e => {
@@ -1294,7 +1361,8 @@ $('#entForm').addEventListener('submit', e => {
   if (!(min > 0)) return toast('Poné cuántos minutos entrenaste.');
   const base = S.editSes ? getRec('sesiones', S.editSes) : null;
   upsert('sesiones', Object.assign({}, base || {id: uid()}, {fecha, tipo: S.entTipo, min, rpe: +$('#eRpe').value, nota: $('#eNota').value.trim(), obj: [...S.selObj]}));
-  S.editSes = null; closeSheet(); resetSesForm(); commit(); toast(base ? 'Guardado' : 'Sesión registrada. Seguí así.');
+  S.selDay = fecha <= todayISO && weekStart(fecha) === weekStart(todayISO) ? fecha : S.selDay;
+  S.editSes = null; closeSheet(); commit(); toast(base ? 'Guardado' : tipoName(S.entTipo)+' cargado'+(fecha === todayISO ? ' para hoy' : fecha === addDays(todayISO, -1) ? ' para ayer' : ' el '+dayLabel(fecha)));
 });
 $('#eDel').addEventListener('click', e => armOr(e.currentTarget, () => { const id = S.editSes; S.editSes = null; tomb('sesiones', id); closeSheet(); commit(); toast('Sesión borrada'); }));
 $('#goalMinus').addEventListener('click', () => setCfg({metaSemanal: Math.max(1, cfg().metaSemanal - 1)}));
@@ -1736,8 +1804,11 @@ $('#prevM').addEventListener('click', () => setMonth(addMonths(S.month, -1)));
 $('#nextM').addEventListener('click', () => setMonth(addMonths(S.month, 1)));
 $$('.nav .tab').forEach(b => b.addEventListener('click', () => { S.tab = b.dataset.tab; try { history.replaceState(null, '', '#'+S.tab); } catch(_){} render(); window.scrollTo({top: 0}); }));
 window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (t === 'entreno' || t === 'finanzas'){ S.tab = t; render(); } });
-$('#entHero').addEventListener('click', e => { if (e.target.closest('[data-timer]')) openTimer(); });
-$('#timerBtn2').addEventListener('click', () => { closeSheet(); openTimer(); });
+$('#entView').addEventListener('click', e => {
+  if (e.target.closest('[data-timer]')) return openTimer();
+  const dd = e.target.closest('[data-day]'); if (dd && !dd.disabled){ S.selDay = dd.dataset.day; return render(); }
+  const a = e.target.closest('[data-act]'); if (a) return a.dataset.edit ? openSes(a.dataset.edit) : openSes(null, {tipo: a.dataset.act, fecha: S.selDay});
+});
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   const before = todayISO; refreshToday();
